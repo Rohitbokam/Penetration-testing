@@ -439,7 +439,7 @@
         }
 
         /* Add text color rules */
-        h1, h2, h3, h4, h5, h6, p, span, div, a, label, li, td, th, input, select, textarea, 
+        h1, h2, h3, h4, h5, h6, p, span, div, a, label, li, td, th, input, select, textarea,
         .form-check-label, .form-text, .text-muted, .small, .lead, .nav-link, .navbar-brand,
         .card-title, .form-label, .table, .terminal-text li, .calendar-day, .dropdown-item,
         .terminal-box, .vulnerability-badge, .test-card, .dashboard-card-content {
@@ -455,7 +455,7 @@
         .badge {
             color: #000000 !important;
         }
-        .badge.bg-danger, .badge.bg-primary, .badge.bg-secondary, .badge.bg-info, 
+        .badge.bg-danger, .badge.bg-primary, .badge.bg-secondary, .badge.bg-info,
         .badge.bg-dark, .severity-critical, .severity-high, .severity-info {
             color: #ffffff !important;
         }
@@ -477,7 +477,7 @@
         .btn-secondary, .btn-warning, .btn-success, .btn-light {
             color: #000000 !important;
         }
-        .btn-outline-primary:hover, .btn-outline-secondary:hover, 
+        .btn-outline-primary:hover, .btn-outline-secondary:hover,
         .btn-outline-danger:hover, .btn-outline-info:hover {
             color: #ffffff !important;
         }
@@ -552,14 +552,14 @@
 
         /* Make reports table responsive */
         @media (max-width: 768px) {
-            #reports-table thead th:nth-child(4), 
+            #reports-table thead th:nth-child(4),
             #reports-table tbody td:nth-child(4) {
                 display: none;
             }
         }
 
         @media (max-width: 576px) {
-            #reports-table thead th:nth-child(3), 
+            #reports-table thead th:nth-child(3),
             #reports-table tbody td:nth-child(3) {
                 display: none;
             }
@@ -635,6 +635,9 @@
                 <img src="/assets/threatlens-logo.ico" alt="ThreatLens" style="width:48px;height:48px;">
             </div>
             <div class="cyber-loader-text">INITIALIZING SCAN</div>
+            <div class="cyber-loader-bar">
+                <div class="cyber-loader-progress" id="cyber-loader-progress"></div>
+            </div>
         </div>
     </div>
 
@@ -728,6 +731,17 @@
                             <span class="badge bg-primary p-2 mb-2">Wappalyzer API</span>
                             <span class="badge bg-primary p-2 mb-2">OWASP ZAP</span>
                             <span class="badge bg-primary p-2 mb-2">Metasploit</span>
+                            <span class="badge bg-primary p-2 mb-2">Gobuster</span>
+                            <span class="badge bg-primary p-2 mb-2">Sublist3r</span>
+                            <span class="badge bg-primary p-2 mb-2">CloudSploit</span>
+                            <span class="badge bg-primary p-2 mb-2">Nuclei</span>
+                            <span class="badge bg-primary p-2 mb-2">Amass</span>
+                            <span class="badge bg-primary p-2 mb-2">ffuf</span>
+                            <span class="badge bg-primary p-2 mb-2">Hydra</span>
+                            <span class="badge bg-primary p-2 mb-2">John the Ripper</span>
+                            <span class="badge bg-primary p-2 mb-2">Burp Suite Pro</span>
+                            <span class="badge bg-primary p-2 mb-2">Commix</span>
+                            <span class="badge bg-primary p-2 mb-2">Masscan</span>
                         </div>
                         <p class="mt-3">Each tool is carefully integrated to provide a seamless testing experience while delivering professional-grade results.</p>
                     </div>
@@ -745,7 +759,7 @@
                     <i class="bi bi-plus-circle me-2"></i>New Scan
                 </button>
             </div>
-            
+
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4">
                     <div class="cyber-card dashboard-card">
@@ -756,7 +770,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4">
                     <div class="cyber-card dashboard-card">
                         <div class="dashboard-card-content">
@@ -766,7 +780,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4">
                     <div class="cyber-card dashboard-card">
                         <div class="dashboard-card-content">
@@ -777,7 +791,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="row mt-4">
                 <div class="col-lg-8">
                     <div class="cyber-card h-100">
@@ -800,7 +814,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-4 mt-4 mt-lg-0">
                     <div class="cyber-card h-100">
                         <h4 class="mb-4">Security Tips</h4>
@@ -841,7 +855,7 @@
     <section id="scan-setup">
         <div class="container py-4">
             <h2 class="mb-4">Set Up New Security Scan</h2>
-            
+
             <div class="cyber-card">
                 <form id="scan-form">
                     <div class="mb-4">
@@ -849,7 +863,7 @@
                         <input type="text" class="form-control bg-dark text-light" id="target-url" placeholder="https://example.com or 192.168.1.1" required>
                         <div class="form-text">Only scan targets you have permission to test.</div>
                     </div>
-                    
+
                     <div class="mb-4">
                         <label class="form-label">Scan Modules</label>
                         <div class="row g-3">
@@ -913,9 +927,89 @@
                                     <input type="checkbox" name="scan_modules" value="full_scan" class="d-none">
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-folder2-open tech-icon"></i>
+                                    </div>
+                                    <h5>Directory Fuzzing</h5>
+                                    <p class="small text-muted">Discovers hidden directories and files</p>
+                                    <input type="checkbox" name="scan_modules" value="dir_fuzz" class="d-none">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-globe tech-icon"></i>
+                                    </div>
+                                    <h5>Subdomain Enum</h5>
+                                    <p class="small text-muted">Enumerates subdomains of the target</p>
+                                    <input type="checkbox" name="scan_modules" value="subdomain_enum" class="d-none">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-cloud-check tech-icon"></i>
+                                    </div>
+                                    <h5>Cloud Security</h5>
+                                    <p class="small text-muted">Checks for misconfigured cloud resources</p>
+                                    <input type="checkbox" name="scan_modules" value="cloud_scan" class="d-none">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-cpu tech-icon"></i>
+                                    </div>
+                                    <h5>Advanced Fuzzing</h5>
+                                    <p class="small text-muted">Deep fuzzing with ffuf</p>
+                                    <input type="checkbox" name="scan_modules" value="adv_fuzz" class="d-none">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-file-earmark-code tech-icon"></i>
+                                    </div>
+                                    <h5>Template Scan</h5>
+                                    <p class="small text-muted">Vulnerability scanning with Nuclei</p>
+                                    <input type="checkbox" name="scan_modules" value="nuclei_scan" class="d-none">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-key tech-icon"></i>
+                                    </div>
+                                    <h5>Password Audit</h5>
+                                    <p class="small text-muted">Weak credential testing with Hydra</p>
+                                    <input type="checkbox" name="scan_modules" value="pass_audit" class="d-none">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-router tech-icon"></i>
+                                    </div>
+                                    <h5>Network Mapping</h5>
+                                    <p class="small text-muted">High-speed scanning with Masscan</p>
+                                    <input type="checkbox" name="scan_modules" value="net_map" class="d-none">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="cyber-card scan-option glow-border h-100" onclick="toggleScanOption(this)">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-wifi tech-icon"></i>
+                                    </div>
+                                    <h5>IoT Scan</h5>
+                                    <p class="small text-muted">IoT device security assessment</p>
+                                    <input type="checkbox" name="scan_modules" value="iot_scan" class="d-none">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-4">
                         <label class="form-label">Scan Options</label>
                         <div class="row g-3">
@@ -967,7 +1061,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-secondary" onclick="showSection('dashboard')">Back to Dashboard</button>
                         <button type="button" class="btn btn-primary" onclick="startScan()">Start Scan</button>
@@ -981,7 +1075,7 @@
     <section id="scan-progress">
         <div class="container py-4">
             <h2 class="mb-4">Scan in Progress</h2>
-            
+
             <div class="cyber-card">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
@@ -990,7 +1084,7 @@
                     </div>
                     <button class="btn btn-outline-danger" onclick="cancelScan()">Cancel Scan</button>
                 </div>
-                
+
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-2">
                         <span>Overall Progress</span>
@@ -1000,7 +1094,7 @@
                         <div class="progress-bar" role="progressbar" style="width: 0%" id="overall-progress"></div>
                     </div>
                 </div>
-                
+
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="cyber-card">
@@ -1034,13 +1128,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="terminal-box">
                     <ul class="terminal-text" id="scan-log">
                         <li>> Initializing scan process...</li>
                     </ul>
                 </div>
-                
+
                 <div class="mt-4 text-center">
                     <p class="text-muted">You'll be automatically redirected to the results page when the scan completes.</p>
                 </div>
@@ -1160,34 +1254,34 @@
         <div class="container py-4">
             <h2 class="mb-4">Knowledge check - Security Knowledge</h2>
             <p class="text-muted mb-4">Practice your security knowledge with random questions from our database of 200 security topics.</p>
-            
+
             <div class="cyber-card mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4>Current Test: Web Application Security</h4>
                     <span class="badge bg-primary p-2">Progress: <span id="test-progress-value">0</span>%</span>
                 </div>
-                
+
                 <div class="mb-4">
                     <div class="progress test-progress">
                         <div class="progress-bar" role="progressbar" style="width: 0%" id="test-progress-bar"></div>
                     </div>
                 </div>
-                
+
                 <div id="test-questions">
                     <!-- Questions will be dynamically loaded here from question bank -->
                 </div>
-                
+
                 <div class="d-flex justify-content-between mt-4">
                     <button class="btn btn-outline-secondary" onclick="showSection('dashboard')">Save & Exit</button>
                     <button class="btn btn-primary" onclick="submitTest()">Submit Test</button>
                 </div>
-                
+
                 <div id="test-results" style="display: none;">
                     <div class="text-center py-4">
                         <i class="bi bi-trophy text-warning" style="font-size: 4rem;"></i>
                         <h3 class="mt-3">Test Completed!</h3>
                         <p class="lead">Your score: <span id="test-score">0</span>/15</p>
-                        
+
                         <div class="cyber-card mt-4 mb-4">
                             <h5>Knowledge Areas</h5>
                             <div class="mb-3">
@@ -1209,7 +1303,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="d-flex justify-content-center gap-3">
                             <button class="btn btn-outline-secondary" onclick="showSection('dashboard')">Return to Dashboard</button>
                             <button class="btn btn-primary" onclick="restartTest()">Try Again</button>
@@ -1262,7 +1356,7 @@
             linkTo: linkTo,
             linkData: linkData
         };
-        
+
         notifications.unshift(notification);
         unreadCount++;
         updateNotificationBadge();
@@ -1279,7 +1373,7 @@
             }
             return n;
         });
-        
+
         updateNotificationBadge();
         renderNotifications();
     }
@@ -1290,7 +1384,7 @@
             n.read = true;
             return n;
         });
-        
+
         unreadCount = 0;
         updateNotificationBadge();
         renderNotifications();
@@ -1308,7 +1402,7 @@
     // Render notifications in the dropdown
     function renderNotifications() {
         const notificationList = document.getElementById('notification-list');
-        
+
         if (notifications.length === 0) {
             notificationList.innerHTML = `
                 <div class="text-center py-4 text-muted">
@@ -1318,25 +1412,25 @@
             `;
             return;
         }
-        
+
         notificationList.innerHTML = '';
-        
+
         notifications.forEach(notification => {
             let icon = 'bi-bell';
-            
+
             if (notification.type === 'scan-completed') icon = 'bi-check-circle';
             if (notification.type === 'scan-started') icon = 'bi-play-circle';
             if (notification.type === 'vulnerability') icon = 'bi-exclamation-triangle';
             if (notification.type === 'system') icon = 'bi-gear';
             if (notification.type === 'tip') icon = 'bi-lightbulb';
-            
+
             const timestamp = new Intl.DateTimeFormat('default', {
                 hour: 'numeric',
                 minute: 'numeric',
                 day: 'numeric',
                 month: 'short'
             }).format(new Date(notification.timestamp));
-            
+
             const notificationItem = document.createElement('div');
             notificationItem.className = `notification-item d-flex ${notification.read ? '' : 'unread'}`;
             notificationItem.innerHTML = `
@@ -1351,26 +1445,26 @@
                     <p class="small mb-0 text-muted">${notification.details}</p>
                 </div>
             `;
-            
+
             notificationItem.addEventListener('click', function() {
                 markNotificationAsRead(notification.id);
-                
+
                 if (notification.linkTo) {
                     showSection(notification.linkTo);
-                    
+
                     if (notification.linkData) {
                         if (notification.linkTo === 'reports' && notification.linkData.scanId) {
                             viewScanDetails(notification.linkData.scanId);
                         }
                     }
                 }
-                
+
                 document.getElementById('notification-dropdown').style.display = 'none';
             });
-            
+
             notificationList.appendChild(notificationItem);
         });
-        
+
         localStorage.setItem('threatlens_notifications', JSON.stringify(notifications));
     }
 
@@ -1390,17 +1484,17 @@
         document.querySelectorAll('section').forEach(section => {
             section.style.display = 'none';
         });
-        
+
         document.getElementById(sectionId).style.display = 'block';
-        
+
         if (sectionId === 'dashboard') {
             updateDashboardCounters();
         }
-        
+
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
         });
-        
+
         const navItems = {
             'landing-page': 'nav-home',
             'dashboard': 'nav-dashboard',
@@ -1409,7 +1503,7 @@
             'reports': 'nav-reports',
             'testing-page': 'nav-testing'
         };
-        
+
         const navId = navItems[sectionId];
         if (navId) {
             const navLink = document.querySelector(`#${navId} .nav-link`);
@@ -1417,23 +1511,23 @@
                 navLink.classList.add('active');
             }
         }
-        
+
         if (sectionId === 'testing-page') {
             restartTest();
         }
-        
+
         if (sectionId === 'reports') {
             // handled by override
         }
     }
-    
+
     // Toggle scan option selection
     function toggleScanOption(element) {
         element.classList.toggle('selected');
         const checkbox = element.querySelector('input[type="checkbox"]');
         checkbox.checked = !checkbox.checked;
     }
-    
+
     // Skip login and go directly to dashboard
     function skipLogin() {
         document.getElementById('nav-home').classList.add('d-none');
@@ -1442,26 +1536,26 @@
         document.getElementById('nav-reports').classList.remove('d-none');
         document.getElementById('nav-testing').classList.remove('d-none');
         document.getElementById('nav-notifications').classList.remove('d-none');
-        
+
         localStorage.setItem('threatlens_loggedIn', 'true');
-        
+
         loadNotifications();
         setupSystemNotifications();
-        
+
         addNotification(
             'system',
             'Welcome to ThreatLens',
             'Your advanced web penetration testing platform is ready',
             'dashboard'
         );
-        
+
         showSection('dashboard');
     }
 
     // Modified startScan() function to add notification and use cyberpunk loader
     function startScan() {
         const targetUrl = document.getElementById('target-url').value;
-        
+
         if (!targetUrl) {
             Swal.fire({
                 title: 'Error',
@@ -1470,7 +1564,7 @@
             });
             return;
         }
-        
+
         const selectedModules = document.querySelectorAll('input[name="scan_modules"]:checked');
         if (selectedModules.length === 0) {
             Swal.fire({
@@ -1480,14 +1574,14 @@
             });
             return;
         }
-        
+
         const loaderText = document.querySelector('.cyber-loader-text');
         loaderText.textContent = 'INITIALIZING SCAN';
         document.getElementById('cyber-loader-progress').style.width = '15%';
         document.getElementById('cyber-loader').style.display = 'flex';
-        
+
         document.getElementById('scan-target-display').textContent = `Target: ${targetUrl}`;
-        
+
         const modulesValues = [];
         selectedModules.forEach(module => {
             modulesValues.push(module.value);
@@ -1509,7 +1603,7 @@
         .then(response => response.json())
         .then(data => {
             scannerPayload.scanId = data.scanId;
-            
+
             let scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
             const scanData = {
                 id: data.scanId,
@@ -1521,7 +1615,7 @@
             scanHistory.push(scanData);
             localStorage.setItem('threatlens_scanHistory', JSON.stringify(scanHistory));
             localStorage.setItem('threatlens_currentScan', JSON.stringify(scanData));
-            
+
             addNotification(
                 'scan-started',
                 'Scan Started',
@@ -1529,10 +1623,14 @@
                 'scan-progress',
                 { scanId: data.scanId }
             );
-            
+
+            // Switch view to progress and hide loader
+            showSection('scan-progress');
+            document.getElementById('cyber-loader').style.display = 'none';
+
             document.getElementById('scan-log').innerHTML = `<li>> APIScanner initiated for target: ${targetUrl} (scanId: ${data.scanId})...</li>`;
-            
-            simulateScanProgress(data.scanId);
+
+            trackScanProgress(data.scanId);
         })
         .catch(error => {
             console.error('Error triggering APIScanner:', error);
@@ -1544,8 +1642,8 @@
         });
     }
 
-    // Modified simulateScanProgress() function with polling for APIScanStatus and cyberpunk loader updates
-    function simulateScanProgress(scanId, isSimulated = false) {
+    // Modified trackScanProgress() function with polling for APIScanStatus
+    function trackScanProgress(scanId) {
         let progress = 0;
         const progressBar = document.getElementById('overall-progress');
         const progressText = document.getElementById('progress-percentage');
@@ -1554,7 +1652,7 @@
         const scanLog = document.getElementById('scan-log');
         const elapsedTime = document.getElementById('elapsed-time');
         const issuesFound = document.getElementById('issues-found');
-        
+
         const modules = [
             { name: "Initializing scan environment", details: "Setting up secure testing environment" },
             { name: "Port Scanning (Nmap)", details: "Detecting open ports and services" },
@@ -1564,15 +1662,15 @@
             { name: "Technology Stack Detection", details: "Identifying web technologies and frameworks" },
             { name: "Finishing Scan", details: "Compiling results and generating report" }
         ];
-        
+
         let moduleIndex = 0;
         let seconds = 0;
         let issues = 0;
-        
+
         currentModule.textContent = modules[moduleIndex].name;
         moduleDetails.textContent = modules[moduleIndex].details;
         scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
-        
+
         function pollScanStatus() {
             fetch('https://magicloops.dev/api/loop/78f2e202-d337-4bc4-b0c6-0b6f241cc5ee/run', {
                 method: 'POST',
@@ -1589,9 +1687,9 @@
             })
             .catch(console.error);
         }
-        
+
         pollScanStatus();
-        
+
         const progressInterval = setInterval(() => {
             pollScanStatus();
             progress += 1;
@@ -1603,7 +1701,7 @@
             const minutes = Math.floor((seconds % 3600) / 60);
             const secs = Math.floor(seconds % 60);
             elapsedTime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            
+
             if (progress % 10 === 0) {
                 issues++;
                 issuesFound.textContent = issues;
@@ -1613,7 +1711,7 @@
                 const terminalBox = document.querySelector('.terminal-box');
                 terminalBox.scrollTop = terminalBox.scrollHeight;
             }
-            
+
             if (progress === 10) {
                 moduleIndex = 1;
                 currentModule.textContent = modules[moduleIndex].name;
@@ -1645,24 +1743,24 @@
                 moduleDetails.textContent = modules[moduleIndex].details;
                 scanLog.innerHTML += `<li>> Finalizing scan and generating report...</li>`;
             }
-            
+
             const terminalBox = document.querySelector('.terminal-box');
             terminalBox.scrollTop = terminalBox.scrollHeight;
-            
+
             if (moduleIndex < modules.length) {
                 document.querySelector('.cyber-loader-text').textContent = modules[moduleIndex].name.toUpperCase();
             }
-            
+
             if (progress >= 100) {
                 clearInterval(progressInterval);
                 scanLog.innerHTML += `<li>> Scan completed successfully.</li>`;
                 scanLog.innerHTML += `<li>> Found ${issues} potential security issues.</li>`;
-                
+
                 const currentScan = JSON.parse(localStorage.getItem('threatlens_currentScan') || '{}');
                 currentScan.status = 'completed';
                 currentScan.issues = issues;
                 localStorage.setItem('threatlens_currentScan', JSON.stringify(currentScan));
-                
+
                 let scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
                 scanHistory = scanHistory.map(scan => {
                     if (scan.id === currentScan.id) {
@@ -1675,7 +1773,7 @@
                     return scan;
                 });
                 localStorage.setItem('threatlens_scanHistory', JSON.stringify(scanHistory));
-                
+
                 addNotification(
                     'scan-completed',
                     'Scan Completed',
@@ -1683,7 +1781,7 @@
                     'reports',
                     { scanId: currentScan.id }
                 );
-                
+
                 if (issues > 2) {
                     addNotification(
                         'vulnerability',
@@ -1693,9 +1791,9 @@
                         { scanId: currentScan.id }
                     );
                 }
-                
+
                 updateDashboardCounters();
-                
+
                 const reportPayload = {
                     scanId: scanId,
                     results: { vulnerabilities: [ { name: "Vuln Sample", risk: "High", recommendation: "Fix it" } ] }
@@ -1711,9 +1809,9 @@
                 .catch(error => {
                     console.error('Error calling APIReportLoop:', error);
                 });
-                
+
                 document.getElementById('cyber-loader').style.display = 'none';
-                
+
                 Swal.fire({
                     title: 'Scan Complete',
                     text: `Found some potential security issues.`,
@@ -1741,7 +1839,7 @@
                 if (currentScan.id) {
                     currentScan.status = 'cancelled';
                     localStorage.setItem('threatlens_currentScan', JSON.stringify(currentScan));
-                    
+
                     let scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
                     scanHistory = scanHistory.map(scan => {
                         if (scan.id === currentScan.id) {
@@ -1754,7 +1852,7 @@
                     });
                     localStorage.setItem('threatlens_scanHistory', JSON.stringify(scanHistory));
                 }
-                
+
                 showSection('dashboard');
                 Swal.fire(
                     'Cancelled',
@@ -1772,7 +1870,7 @@
             q2: document.querySelector('input[name="q2"]:checked')?.value || '',
             q3: document.querySelector('input[name="q3"]:checked')?.value || ''
         };
-        
+
         if (!answers.q1 || !answers.q2 || !answers.q3) {
             Swal.fire({
                 title: 'Incomplete Test',
@@ -1781,41 +1879,41 @@
             });
             return;
         }
-        
+
         const correctAnswers = {
             q1: 'c',
             q2: 'b',
             q3: 'd'
         };
-        
+
         let score = 0;
         let sqlScore = 0;
         let xssScore = 0;
         let authScore = 0;
-        
+
         if (answers.q1 === correctAnswers.q1) {
             score += 5;
             sqlScore = 100;
         }
-        
+
         if (answers.q2 === correctAnswers.q2) {
             score += 5;
             xssScore = 100;
         }
-        
+
         if (answers.q3 === correctAnswers.q3) {
             score += 5;
             authScore = 100;
         }
-        
+
         document.getElementById('test-questions').style.display = 'none';
         document.getElementById('test-results').style.display = 'block';
-        
+
         document.getElementById('test-score').textContent = score;
         document.getElementById('score-sql').style.width = sqlScore + '%';
         document.getElementById('score-xss').style.width = xssScore + '%';
         document.getElementById('score-auth').style.width = authScore + '%';
-        
+
         // hide the “Current Test” header, progress & submit button:
         document.querySelector('#testing-page .d-flex.justify-content-between').style.display = 'none';
         document.querySelector('#testing-page .test-progress').style.display = 'none';
@@ -1827,10 +1925,10 @@
         document.querySelectorAll('input[type="radio"]').forEach(input => {
             input.checked = false;
         });
-        
+
         document.getElementById('test-progress-bar').style.width = '0%';
         document.getElementById('test-progress-value').textContent = '0';
-        
+
         const sampleQuestions = [
             {
                 question: "Which of the following is NOT a common SQL injection attack method?",
@@ -1863,13 +1961,13 @@
                 ]
             }
         ];
-        
-        const randomQuestions = typeof securityQuestionBank !== 'undefined' ? 
+
+        const randomQuestions = typeof securityQuestionBank !== 'undefined' ?
             getRandomQuestions(securityQuestionBank, 5) : sampleQuestions;
-        
+
         const questionsContainer = document.getElementById('test-questions');
         questionsContainer.innerHTML = '';
-        
+
         randomQuestions.forEach((question, index) => {
             const questionHtml = `
                 <div class="test-card" id="question-${index+1}">
@@ -1896,19 +1994,19 @@
             `;
             questionsContainer.innerHTML += questionHtml;
         });
-        
+
         questionsContainer.innerHTML += `
             <div class="d-flex justify-content-between mt-4">
                 <button class="btn btn-outline-secondary" onclick="showSection('dashboard')">Save & Exit</button>
                 <button class="btn btn-primary" onclick="submitTest()">Submit Test</button>
             </div>
         `;
-        
+
         localStorage.setItem('currentTestQuestions', JSON.stringify(randomQuestions));
-        
+
         document.getElementById('test-questions').style.display = 'block';
         document.getElementById('test-results').style.display = 'none';
-        
+
         document.querySelectorAll('input[name^="q"]').forEach(input => {
             input.addEventListener('change', updateTestProgress);
         });
@@ -1942,7 +2040,7 @@
     function initTerminalAnimation() {
         const terminalText = document.getElementById('terminal-animation');
         if (!terminalText) return;
-        
+
         const lines = [
             "> Initializing ThreatLens Scanner...",
             "> Loading modules: nmap, nikto, sqlmap, xsstrike",
@@ -1957,35 +2055,35 @@
             "> Generating comprehensive report...",
             "> Scan complete: 3 vulnerabilities found"
         ];
-        
+
         let lineIndex = 0;
-        
+
         terminalText.innerHTML = "";
         for (let i = 0; i < 4; i++) {
             if (i < lines.length) {
                 terminalText.innerHTML += `<li>${lines[i]}</li>`;
             }
         }
-        
+
         let lastLine = terminalText.lastElementChild;
         if (lastLine) {
             lastLine.innerHTML += ' <span class="terminal-cursor"></span>';
         }
-        
+
         lineIndex = 4;
-        
+
         const terminalInterval = setInterval(() => {
             if (lineIndex < lines.length) {
                 lastLine = terminalText.lastElementChild;
                 if (lastLine) {
                     lastLine.innerHTML = lastLine.innerHTML.replace('<span class="terminal-cursor"></span>', '');
                 }
-                
+
                 terminalText.innerHTML += `<li>${lines[lineIndex]}</li>`;
-                
+
                 lastLine = terminalText.lastElementChild;
                 lastLine.innerHTML += ' <span class="terminal-cursor"></span>';
-                
+
                 lineIndex++;
             } else {
                 clearInterval(terminalInterval);
@@ -2004,10 +2102,10 @@
             document.getElementById('nav-reports').classList.remove('d-none');
             document.getElementById('nav-testing').classList.remove('d-none');
             document.getElementById('nav-notifications').classList.remove('d-none');
-            
+
             loadNotifications();
             setupSystemNotifications();
-            
+
             showSection('dashboard');
         }
     }
@@ -2023,21 +2121,74 @@
         this.checked = false;
     });
 
+    // Helper function to get severity class
+    function getSeverityClass(risk) {
+        if (!risk) return 'bg-secondary';
+        switch (risk.toLowerCase()) {
+            case 'critical': return 'bg-danger';
+            case 'high': return 'bg-danger';
+            case 'medium': return 'bg-warning';
+            case 'low': return 'bg-info';
+            default: return 'bg-secondary';
+        }
+    }
+
+    // Populate dashboard activity table
+    function populateDashboardActivity() {
+        const scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
+        const tableBody = document.getElementById('dashboard-activity-body');
+
+        if (!tableBody) return;
+
+        tableBody.innerHTML = '';
+
+        if (scanHistory.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No recent activity</td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Show last 5 scans
+        const recentScans = scanHistory.slice(-5).reverse();
+
+        recentScans.forEach(scan => {
+            const date = new Date(scan.date).toLocaleDateString();
+            const statusClass = getStatusClass(scan.status);
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${date}</td>
+                <td>${scan.target}</td>
+                <td>${scan.type || 'Standard'}</td>
+                <td><span class="badge ${statusClass}">${scan.status}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewScanDetails('${scan.id}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
     // Add this function to update dashboard counters
     function updateDashboardCounters() {
         const scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
-        
+
         const totalScansElement = document.querySelector('.dashboard-card:nth-child(1) .display-4');
         if (totalScansElement) {
             totalScansElement.textContent = scanHistory.length;
         }
-        
+
         const vulnerabilitiesElement = document.querySelector('.dashboard-card:nth-child(2) .display-4');
         if (vulnerabilitiesElement) {
             const totalIssues = scanHistory.reduce((total, scan) => total + (scan.issues || 0), 0);
             vulnerabilitiesElement.textContent = totalIssues;
         }
-        
+
         const criticalIssuesElement = document.querySelector('.dashboard-card:nth-child(3) .display-4');
         if (criticalIssuesElement) {
             const totalIssues = scanHistory.reduce((total, scan) => total + (scan.issues || 0), 0);
@@ -2068,7 +2219,7 @@
     function viewScanDetails(scanId) {
         const scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
         const scan = scanHistory.find(s => s.id === scanId);
-        
+
         if (scan) {
             localStorage.setItem('threatlens_currentViewScan', JSON.stringify(scan));
             showSection('reports');
@@ -2078,6 +2229,15 @@
     // 3) Modified populateReportSection to always render dynamic content
     function populateReportSection() {
         const reportHeader = document.getElementById('current-scan-report');
+
+        // Get scan data
+        const scanData = JSON.parse(localStorage.getItem('threatlens_currentViewScan') || localStorage.getItem('threatlens_currentScan') || 'null');
+
+        if (!scanData) {
+            reportHeader.innerHTML = '<div class="text-center p-4">No report data available</div>';
+            return;
+        }
+
         // clear old header and inject fresh dynamic data only
         reportHeader.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -2091,8 +2251,8 @@
               </div>
             </div>`;
 
-        // ALWAYS generate vulnerabilities (never early return)
-        const vulnerabilities = generateVulnerabilities(scanData);
+        // Use results from scanData
+        const vulnerabilities = scanData.results || [];
 
         const vulnContainer = document.getElementById('vulnerability-container');
         const summaryContainer = document.getElementById('security-summary-container');
@@ -2105,7 +2265,11 @@
             vulnerabilities.forEach(vuln => {
                 const severityClass = getSeverityClass(vuln.risk);
                 const card = document.createElement('div');
-                card.className = `vuln-card p-3 mb-3 vuln-${vuln.risk.toLowerCase()}`;
+                card.className = `vuln-card p-3 mb-3`;
+                if (vuln.risk) {
+                    card.classList.add(`vuln-${vuln.risk.toLowerCase()}`);
+                }
+
                 card.innerHTML = `
                     <div class="d-flex justify-content-between">
                       <h5>${vuln.name}</h5>
@@ -2118,19 +2282,46 @@
 
         // summary
         summaryContainer.innerHTML = '';
-        const counts = {Critical:0,High:0,Medium:0,Low:0};
-        vulnerabilities.forEach(v=> counts[v.risk]++);
+        const counts = {Critical:0, High:0, Medium:0, Low:0};
+        vulnerabilities.forEach(v=> {
+            let risk = v.risk || 'Low';
+            risk = risk.charAt(0).toUpperCase() + risk.slice(1).toLowerCase();
+            if (counts.hasOwnProperty(risk)) {
+                counts[risk]++;
+            }
+        });
+
         const total = vulnerabilities.length || 1;
         const pct = key => Math.round((counts[key]/total)*100);
         summaryContainer.innerHTML = `
             <h6>Risk Distribution</h6>
             <div class="progress" style="height:20px;">
-              <div class="progress-bar bg-danger" style="width:${pct('Critical')}%"></div>
-              <div class="progress-bar bg-warning" style="width:${pct('High')}%"></div>
-              <div class="progress-bar bg-info" style="width:${pct('Medium')}%"></div>
-              <div class="progress-bar bg-success" style="width:${pct('Low')}%"></div>
-            </div>`;
+              <div class="progress-bar bg-danger" style="width:${pct('Critical')}%" title="Critical: ${counts['Critical']}"></div>
+              <div class="progress-bar bg-warning" style="width:${pct('High')}%" title="High: ${counts['High']}"></div>
+              <div class="progress-bar bg-info" style="width:${pct('Medium')}%" title="Medium: ${counts['Medium']}"></div>
+              <div class="progress-bar bg-success" style="width:${pct('Low')}%" title="Low: ${counts['Low']}"></div>
+            </div>
+            <div class="mt-3">
+                <ul class="list-unstyled">
+                    <li><span class="badge bg-danger me-2">${counts['Critical']}</span> Critical</li>
+                    <li><span class="badge bg-warning me-2">${counts['High']}</span> High</li>
+                    <li><span class="badge bg-info me-2">${counts['Medium']}</span> Medium</li>
+                    <li><span class="badge bg-success me-2">${counts['Low']}</span> Low</li>
+                </ul>
+            </div>
+            `;
+
+        // Setup PDF export button logic here or ensure it works globally
+        const exportBtn = document.getElementById('export-pdf-link');
+        if (exportBtn) {
+            exportBtn.onclick = (e) => {
+                e.preventDefault();
+                generatePDFReport(scanData.id);
+            };
+        }
     }
+
+
 
     // 4) Modified populateReportsTable to pull from localStorage, custom empty state
     function populateReportsTable(filters = {}) {
@@ -2186,8 +2377,8 @@
         document.getElementById('cyber-loader').style.display = 'flex';
 
         // assemble payload
-        const vulnerabilities = JSON.parse(localStorage.getItem('threatlens_currentVulnerabilities')||'[]');
-        const scanData = JSON.parse(localStorage.getItem('threatlens_currentScan')||'{}');
+        const scanData = JSON.parse(localStorage.getItem('threatlens_currentScan') || '{}');
+        const vulnerabilities = scanData.results || [];
         const payload = { scanId, results:{ vulnerabilities } };
 
         fetch('https://magicloops.dev/api/loop/ee1cce1e-f44f-4c0e-b8b9-6b83febb3d79/run', {
@@ -2221,6 +2412,8 @@
         });
     }
 
+
+
     // 6) Removed startSimulatedScan() and related practice-scan code
 
     // 7) Override showSection to refresh on reports
@@ -2244,7 +2437,7 @@
             'Regular scanning is recommended for critical infrastructure',
             'dashboard'
         );
-        
+
         setInterval(() => {
             const tips = [
                 'Remember to update your systems regularly to patch vulnerabilities',
@@ -2253,12 +2446,12 @@
                 'Regular backups are essential for disaster recovery',
                 'Content Security Policy (CSP) helps prevent XSS attacks'
             ];
-            
+
             if (Math.random() > 0.7) {
                 const randomTip = tips[Math.floor(Math.random() * tips.length)];
                 addNotification('tip', 'Security Tip', randomTip, 'dashboard');
             }
-            
+
             if (Math.random() > 0.9) {
                 addNotification(
                     'system',
@@ -2280,7 +2473,7 @@
                 });
             }
         });
-        
+
         initTerminalAnimation();
         checkLoginStatus();
         updateDashboardCounters();
