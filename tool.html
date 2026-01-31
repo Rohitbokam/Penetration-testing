@@ -1596,8 +1596,11 @@
             options: options
         };
 
-        fetch('https://magicloops.dev/api/loop/989e51ec-c141-4c00-8183-af1289d1619d/run', {
+        fetch('http://localhost:8000/api/v1/scans', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(scannerPayload)
         })
         .then(response => response.json())
@@ -1672,10 +1675,7 @@
         scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
 
         function pollScanStatus() {
-            fetch('https://magicloops.dev/api/loop/78f2e202-d337-4bc4-b0c6-0b6f241cc5ee/run', {
-                method: 'POST',
-                body: JSON.stringify({ scanId: scanId })
-            })
+            fetch(`http://localhost:8000/api/v1/scans/${scanId}`)
             .then(response => response.json())
             .then(statusData => {
                 if (statusData.progress) {
@@ -2381,8 +2381,10 @@
         const vulnerabilities = scanData.results || [];
         const payload = { scanId, results:{ vulnerabilities } };
 
-        fetch('https://magicloops.dev/api/loop/ee1cce1e-f44f-4c0e-b8b9-6b83febb3d79/run', {
-            method:'POST', body: JSON.stringify(payload)
+        fetch(`http://localhost:8000/api/v1/reports/generate?scan_id=${scanId}`, {
+            method:'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         })
         .then(res => res.json())
         .then(data => {
