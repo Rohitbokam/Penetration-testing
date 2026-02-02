@@ -1596,8 +1596,11 @@
             options: options
         };
 
-        fetch('https://magicloops.dev/api/loop/989e51ec-c141-4c00-8183-af1289d1619d/run', {
+        fetch('http://localhost:5000/api/scan/start', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(scannerPayload)
         })
         .then(response => response.json())
@@ -1672,17 +1675,36 @@
         scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
 
         function pollScanStatus() {
-            fetch('https://magicloops.dev/api/loop/78f2e202-d337-4bc4-b0c6-0b6f241cc5ee/run', {
-                method: 'POST',
-                body: JSON.stringify({ scanId: scanId })
+            fetch(`http://localhost:5000/api/scan/status/${scanId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             })
             .then(response => response.json())
             .then(statusData => {
-                if (statusData.progress) {
+                if (statusData.progress !== undefined) {
                     progress = parseInt(statusData.progress);
                     progressBar.style.width = `${progress}%`;
                     progressText.textContent = `${progress}%`;
                     document.getElementById('cyber-loader-progress').style.width = `${progress}%`;
+                }
+                
+                // Update current module if available
+                if (statusData.current_module && statusData.current_module !== currentModule.textContent) {
+                    currentModule.textContent = statusData.current_module;
+                    moduleDetails.textContent = statusData.current_module;
+                    scanLog.innerHTML += `<li>> ${statusData.current_module}...</li>`;
+                    const terminalBox = document.querySelector('.terminal-box');
+                    terminalBox.scrollTop = terminalBox.scrollHeight;
+                }
+                
+                // Check if scan is completed
+                if (statusData.status === 'completed') {
+                    clearInterval(progressInterval);
+                    progress = 100;
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '100%';
                 }
             })
             .catch(console.error);
@@ -1692,136 +1714,85 @@
 
         const progressInterval = setInterval(() => {
             pollScanStatus();
-            progress += 1;
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `${progress}%`;
-            document.getElementById('cyber-loader-progress').style.width = `${progress}%`;
-            seconds += 0.5;
+            
+            // Update elapsed time
+            seconds += 1;
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
             const secs = Math.floor(seconds % 60);
             elapsedTime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
-            if (progress % 10 === 0) {
-                issues++;
-                issuesFound.textContent = issues;
-                const severities = ["Low", "Medium", "High", "Critical"];
-                const severity = severities[Math.floor(Math.random() * severities.length)];
-                scanLog.innerHTML += `<li>> [${severity}] Potential vulnerability found</li>`;
-                const terminalBox = document.querySelector('.terminal-box');
-                terminalBox.scrollTop = terminalBox.scrollHeight;
-            }
-
-            if (progress === 10) {
-                moduleIndex = 1;
-                currentModule.textContent = modules[moduleIndex].name;
-                moduleDetails.textContent = modules[moduleIndex].details;
-                scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
-            } else if (progress === 30) {
-                moduleIndex = 2;
-                currentModule.textContent = modules[moduleIndex].name;
-                moduleDetails.textContent = modules[moduleIndex].details;
-                scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
-            } else if (progress === 50) {
-                moduleIndex = 3;
-                currentModule.textContent = modules[moduleIndex].name;
-                moduleDetails.textContent = modules[moduleIndex].details;
-                scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
-            } else if (progress === 70) {
-                moduleIndex = 4;
-                currentModule.textContent = modules[moduleIndex].name;
-                moduleDetails.textContent = modules[moduleIndex].details;
-                scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
-            } else if (progress === 85) {
-                moduleIndex = 5;
-                currentModule.textContent = modules[moduleIndex].name;
-                moduleDetails.textContent = modules[moduleIndex].details;
-                scanLog.innerHTML += `<li>> Starting ${modules[moduleIndex].name}...</li>`;
-            } else if (progress === 95) {
-                moduleIndex = 6;
-                currentModule.textContent = modules[moduleIndex].name;
-                moduleDetails.textContent = modules[moduleIndex].details;
-                scanLog.innerHTML += `<li>> Finalizing scan and generating report...</li>`;
-            }
-
-            const terminalBox = document.querySelector('.terminal-box');
-            terminalBox.scrollTop = terminalBox.scrollHeight;
-
-            if (moduleIndex < modules.length) {
-                document.querySelector('.cyber-loader-text').textContent = modules[moduleIndex].name.toUpperCase();
-            }
-
             if (progress >= 100) {
                 clearInterval(progressInterval);
                 scanLog.innerHTML += `<li>> Scan completed successfully.</li>`;
-                scanLog.innerHTML += `<li>> Found ${issues} potential security issues.</li>`;
+                
+                // Fetch real results from backend
+                fetch(`http://localhost:5000/api/scan/results/${scanId}`)
+                    .then(response => response.json())
+                    .then(resultData => {
+                        const vulnerabilities = resultData.results || [];
+                        issues = vulnerabilities.length;
+                        
+                        scanLog.innerHTML += `<li>> Found ${issues} potential security issues.</li>`;
+                        issuesFound.textContent = issues;
+                        
+                        const currentScan = JSON.parse(localStorage.getItem('threatlens_currentScan') || '{}');
+                        currentScan.status = 'completed';
+                        currentScan.issues = issues;
+                        currentScan.results = vulnerabilities;
+                        localStorage.setItem('threatlens_currentScan', JSON.stringify(currentScan));
 
-                const currentScan = JSON.parse(localStorage.getItem('threatlens_currentScan') || '{}');
-                currentScan.status = 'completed';
-                currentScan.issues = issues;
-                localStorage.setItem('threatlens_currentScan', JSON.stringify(currentScan));
+                        let scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
+                        scanHistory = scanHistory.map(scan => {
+                            if (scan.id === currentScan.id) {
+                                return {
+                                    ...scan,
+                                    status: 'completed',
+                                    issues: issues,
+                                    results: vulnerabilities
+                                };
+                            }
+                            return scan;
+                        });
+                        localStorage.setItem('threatlens_scanHistory', JSON.stringify(scanHistory));
 
-                let scanHistory = JSON.parse(localStorage.getItem('threatlens_scanHistory') || '[]');
-                scanHistory = scanHistory.map(scan => {
-                    if (scan.id === currentScan.id) {
-                        return {
-                            ...scan,
-                            status: 'completed',
-                            issues: issues
-                        };
-                    }
-                    return scan;
-                });
-                localStorage.setItem('threatlens_scanHistory', JSON.stringify(scanHistory));
+                        addNotification(
+                            'scan-completed',
+                            'Scan Completed',
+                            `Target: ${currentScan.target} - Found ${issues} potential issues`,
+                            'reports',
+                            { scanId: currentScan.id }
+                        );
 
-                addNotification(
-                    'scan-completed',
-                    'Scan Completed',
-                    `Target: ${currentScan.target} - Found ${issues} potential issues`,
-                    'reports',
-                    { scanId: currentScan.id }
-                );
+                        if (issues > 2) {
+                            addNotification(
+                                'vulnerability',
+                                'Critical Vulnerabilities Detected',
+                                `Found high-severity issues in ${currentScan.target}`,
+                                'reports',
+                                { scanId: currentScan.id }
+                            );
+                        }
 
-                if (issues > 2) {
-                    addNotification(
-                        'vulnerability',
-                        'Critical Vulnerabilities Detected',
-                        `Found high-severity issues in ${currentScan.target}`,
-                        'reports',
-                        { scanId: currentScan.id }
-                    );
-                }
+                        updateDashboardCounters();
+                        document.getElementById('cyber-loader').style.display = 'none';
 
-                updateDashboardCounters();
-
-                const reportPayload = {
-                    scanId: scanId,
-                    results: { vulnerabilities: [ { name: "Vuln Sample", risk: "High", recommendation: "Fix it" } ] }
-                };
-                fetch('https://magicloops.dev/api/loop/ee1cce1e-f44f-4c0e-b8b9-6b83febb3d79/run', {
-                    method: 'POST',
-                    body: JSON.stringify(reportPayload)
-                })
-                .then(response => response.json())
-                .then(reportData => {
-                    console.log('Report Generated:', reportData.reportUrl);
-                })
-                .catch(error => {
-                    console.error('Error calling APIReportLoop:', error);
-                });
-
-                document.getElementById('cyber-loader').style.display = 'none';
-
-                Swal.fire({
-                    title: 'Scan Complete',
-                    text: `Found some potential security issues.`,
-                    icon: 'success',
-                    confirmButtonText: 'View Results'
-                }).then(() => {
-                    showSection('reports');
-                });
+                        Swal.fire({
+                            title: 'Scan Complete',
+                            text: `Found ${issues} potential security issues.`,
+                            icon: 'success',
+                            confirmButtonText: 'View Results'
+                        }).then(() => {
+                            showSection('reports');
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching results:', error);
+                        scanLog.innerHTML += `<li>> Error fetching scan results</li>`;
+                        document.getElementById('cyber-loader').style.display = 'none';
+                    });
             }
-        }, 250);
+        }, 1000);
     }
 
     // Cancel the current scan
@@ -2369,47 +2340,57 @@
         });
     }
 
-    // 5) Modified generatePDFReport: no SweetAlert prompt, immediate download + toast
+    // 5) Modified generatePDFReport: Generate and download text report
     function generatePDFReport(scanId) {
         // show loader
         document.querySelector('.cyber-loader-text').textContent = 'GENERATING REPORT';
         document.getElementById('cyber-loader-progress').style.width = '50%';
         document.getElementById('cyber-loader').style.display = 'flex';
 
-        // assemble payload
+        // Get scan data
         const scanData = JSON.parse(localStorage.getItem('threatlens_currentScan') || '{}');
         const vulnerabilities = scanData.results || [];
-        const payload = { scanId, results:{ vulnerabilities } };
-
-        fetch('https://magicloops.dev/api/loop/ee1cce1e-f44f-4c0e-b8b9-6b83febb3d79/run', {
-            method:'POST', body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('cyber-loader').style.display = 'none';
-            if (data.reportUrl) {
-                // immediate download
-                const a = document.createElement('a');
-                a.href = data.reportUrl;
-                a.download = `threatlens-report-${scanId}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-
-                // toast
-                Swal.mixin({ toast:true, position:'top-end', showConfirmButton:false, timer:3000 })
-                    .fire({ icon:'success', title:'PDF downloaded' });
-
-                // record and notify
-                localStorage.setItem(`threatlens_report_${scanId}`, data.reportUrl);
-                addNotification('system','Scan Report Ready',`Report for ${scanId} downloaded.`,'reports',{ scanId });
-            }
-        })
-        .catch(err=>{
-            console.error(err);
-            document.getElementById('cyber-loader').style.display = 'none';
-            Swal.fire('Error','Unable to generate report','error');
+        
+        // Generate text report
+        let reportContent = `ThreatLens Security Scan Report\n`;
+        reportContent += `=================================\n\n`;
+        reportContent += `Scan ID: ${scanId}\n`;
+        reportContent += `Target: ${scanData.target}\n`;
+        reportContent += `Date: ${new Date(scanData.date).toLocaleString()}\n`;
+        reportContent += `Status: ${scanData.status}\n`;
+        reportContent += `\n`;
+        reportContent += `Vulnerabilities Found: ${vulnerabilities.length}\n`;
+        reportContent += `\n`;
+        reportContent += `Detailed Findings:\n`;
+        reportContent += `==================\n\n`;
+        
+        vulnerabilities.forEach((vuln, index) => {
+            reportContent += `${index + 1}. ${vuln.name}\n`;
+            reportContent += `   Risk Level: ${vuln.risk}\n`;
+            reportContent += `   Recommendation: ${vuln.recommendation}\n`;
+            reportContent += `\n`;
         });
+        
+        // Create and download text file
+        const blob = new Blob([reportContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `threatlens-report-${scanId}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        document.getElementById('cyber-loader').style.display = 'none';
+        
+        // toast
+        Swal.mixin({ toast:true, position:'top-end', showConfirmButton:false, timer:3000 })
+            .fire({ icon:'success', title:'Report downloaded' });
+
+        // record and notify
+        localStorage.setItem(`threatlens_report_${scanId}`, 'downloaded');
+        addNotification('system','Scan Report Ready',`Report for ${scanId} downloaded.`,'reports',{ scanId });
     }
 
 
