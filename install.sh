@@ -42,7 +42,7 @@ fi
 
 # Update package lists
 echo "📦 Updating package lists..."
-sudo apt-get update -qq
+sudo apt-get update -q || echo "Warning: apt-get update failed"
 
 # Install system tools
 echo "🔧 Installing system tools..."
@@ -50,8 +50,11 @@ echo "🔧 Installing system tools..."
 # Install Nmap
 if ! command -v nmap &> /dev/null; then
     echo "  Installing Nmap..."
-    sudo apt-get install -y nmap > /dev/null 2>&1
-    echo "  ✅ Nmap installed"
+    if sudo apt-get install -y nmap 2>&1 | grep -qi error; then
+        echo "  ⚠️  Error installing Nmap"
+    else
+        echo "  ✅ Nmap installed"
+    fi
 else
     echo "  ✅ Nmap already installed"
 fi
@@ -59,8 +62,11 @@ fi
 # Install Nikto
 if ! command -v nikto &> /dev/null; then
     echo "  Installing Nikto..."
-    sudo apt-get install -y nikto > /dev/null 2>&1
-    echo "  ✅ Nikto installed"
+    if sudo apt-get install -y nikto 2>&1 | grep -qi error; then
+        echo "  ⚠️  Error installing Nikto"
+    else
+        echo "  ✅ Nikto installed"
+    fi
 else
     echo "  ✅ Nikto already installed"
 fi

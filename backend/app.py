@@ -101,20 +101,17 @@ def run_sql_injection_test(target, scan_id):
         scan_status[scan_id]['progress'] = 60
         
         vulnerabilities = []
-        # Simulate SQL injection testing (in reality, use sqlmap or similar)
-        # For safety, we'll do basic checks
-        test_payloads = ["'", "\"", "1' OR '1'='1", "1\" OR \"1\"=\"1"]
+        # NOTE: This is a placeholder for demonstration purposes
+        # Real SQL injection testing requires endpoint discovery and payload injection
+        # Consider integrating SQLMap or implementing custom HTTP-based testing
         
-        for payload in test_payloads:
-            # This is a simulation - real implementation would test actual endpoints
-            vulnerabilities.append({
-                'name': 'SQL Injection Test Point Identified',
-                'risk': 'Critical',
-                'recommendation': 'Implement parameterized queries and input validation. Test with SQLMap for detailed analysis.'
-            })
-            break  # Only add one for demo
+        vulnerabilities.append({
+            'name': '[INFORMATIONAL] SQL Injection Testing Placeholder',
+            'risk': 'Low',
+            'recommendation': 'This module requires manual configuration with specific endpoints. For production use, integrate SQLMap or implement custom HTTP request testing with actual SQL injection payloads.'
+        })
         
-        return vulnerabilities, "SQL injection testing completed"
+        return vulnerabilities, "SQL injection testing completed (placeholder - manual testing recommended)"
     except Exception as e:
         return [], f"Error: {str(e)}"
 
@@ -126,16 +123,16 @@ def run_xss_detection(target, scan_id):
         scan_status[scan_id]['progress'] = 70
         
         vulnerabilities = []
-        # Simulate XSS detection
-        test_payloads = ["<script>alert('XSS')</script>", "<img src=x onerror=alert('XSS')>"]
+        # NOTE: This is a placeholder for demonstration purposes
+        # Real XSS detection requires form discovery and payload injection
         
         vulnerabilities.append({
-            'name': 'Potential XSS Vulnerability',
-            'risk': 'High',
-            'recommendation': 'Implement proper input sanitization and Content Security Policy (CSP).'
+            'name': '[INFORMATIONAL] XSS Detection Placeholder',
+            'risk': 'Low',
+            'recommendation': 'This module requires manual configuration with specific forms/endpoints. For production use, integrate XSStrike or implement custom form-based testing.'
         })
         
-        return vulnerabilities, "XSS detection completed"
+        return vulnerabilities, "XSS detection completed (placeholder - manual testing recommended)"
     except Exception as e:
         return [], f"Error: {str(e)}"
 
@@ -147,19 +144,16 @@ def run_directory_fuzzing(target, scan_id):
         scan_status[scan_id]['progress'] = 80
         
         vulnerabilities = []
-        # Common directories to check
-        common_dirs = ['/admin', '/backup', '/config', '/test', '/dev', '/.git', '/.env']
+        # NOTE: This is a placeholder for demonstration purposes
+        # Real directory fuzzing requires HTTP requests with wordlists
         
-        for dir_path in common_dirs:
-            # Simulate directory discovery
-            vulnerabilities.append({
-                'name': f'Potentially Exposed Directory: {dir_path}',
-                'risk': 'Low',
-                'recommendation': 'Ensure sensitive directories are properly protected or hidden.'
-            })
-            break  # Only add one for demo
+        vulnerabilities.append({
+            'name': '[INFORMATIONAL] Directory Fuzzing Placeholder',
+            'risk': 'Low',
+            'recommendation': 'This module requires integration with tools like Gobuster or ffuf for actual directory enumeration. Manual testing recommended.'
+        })
         
-        return vulnerabilities, "Directory fuzzing completed"
+        return vulnerabilities, "Directory fuzzing completed (placeholder - manual testing recommended)"
     except Exception as e:
         return [], f"Error: {str(e)}"
 
@@ -360,4 +354,12 @@ if __name__ == '__main__':
     print("🚀 ThreatLens Backend Server Starting...")
     print("⚠️  WARNING: Only use on systems you have permission to test!")
     print("📡 Server will run on http://localhost:5000")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    # Use environment variable for debug mode (default: False for security)
+    import os
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    
+    if debug_mode:
+        print("⚠️  DEBUG MODE ENABLED - DO NOT USE IN PRODUCTION!")
+    
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
