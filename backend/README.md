@@ -6,7 +6,7 @@ This is the backend server for ThreatLens that executes real penetration testing
 ## Prerequisites
 
 ### System Requirements
-- Python 3.8 or higher
+- Python 3.8 or higher (tested with Python 3.8-3.11)
 - Linux/Unix system (recommended)
 - Sudo/root access for installing penetration testing tools
 

@@ -23,15 +23,26 @@ scans = {}
 scan_status = {}
 
 def sanitize_target(target):
-    """Validate and sanitize target input"""
-    # Remove dangerous characters
-    target = re.sub(r'[;&|`$()]', '', target)
-    # Basic validation for URL or IP
-    if not (target.startswith('http://') or target.startswith('https://') or 
-            re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', target) or
-            re.match(r'^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$', target)):
-        raise ValueError("Invalid target format")
-    return target
+    """Validate and sanitize target input using whitelist approach"""
+    target = target.strip()
+    
+    # Whitelist approach: Only allow valid URLs and IP addresses
+    # URL pattern (http/https with domain)
+    url_pattern = r'^https?://[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*(/.*)?$'
+    # IP address pattern
+    ip_pattern = r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
+    # Domain pattern (without http/https)
+    domain_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
+    
+    if re.match(url_pattern, target) or re.match(ip_pattern, target) or re.match(domain_pattern, target):
+        # Additional validation for IP addresses
+        if re.match(ip_pattern, target):
+            octets = target.split('.')
+            if any(int(octet) > 255 for octet in octets):
+                raise ValueError("Invalid IP address: octets must be 0-255")
+        return target
+    else:
+        raise ValueError("Invalid target format: must be a valid URL, domain, or IP address")
 
 def run_nmap_scan(target, scan_id):
     """Execute Nmap port scan"""
@@ -40,7 +51,11 @@ def run_nmap_scan(target, scan_id):
         scan_status[scan_id]['current_module'] = 'Port Scanning (Nmap)'
         scan_status[scan_id]['progress'] = 20
         
-        # Run basic nmap scan
+        # Double-check target doesn't contain shell metacharacters before passing to subprocess
+        if any(char in target for char in ['&', '|', ';', '`', '$', '(', ')', '<', '>', '\n', '\r']):
+            return [], "Target validation failed: contains invalid characters"
+        
+        # Run basic nmap scan with explicit argument list (no shell interpretation)
         cmd = ['nmap', '-sV', '-T4', '--top-ports', '1000', target]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         
@@ -183,8 +198,9 @@ def run_tech_stack_analysis(target, scan_id):
                     'risk': 'Low',
                     'recommendation': 'Consider hiding server version information to reduce attack surface.'
                 })
-        except:
-            pass
+        except requests.RequestException as e:
+            # Specific exception for network/request errors
+            return [], f"Request error: {str(e)}"
         
         return vulnerabilities, "Tech stack analysis completed"
     except Exception as e:
@@ -351,12 +367,12 @@ def health_check():
     })
 
 if __name__ == '__main__':
+    import os
     print("🚀 ThreatLens Backend Server Starting...")
     print("⚠️  WARNING: Only use on systems you have permission to test!")
     print("📡 Server will run on http://localhost:5000")
     
     # Use environment variable for debug mode (default: False for security)
-    import os
     debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     
     if debug_mode:

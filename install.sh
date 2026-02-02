@@ -50,10 +50,10 @@ echo "🔧 Installing system tools..."
 # Install Nmap
 if ! command -v nmap &> /dev/null; then
     echo "  Installing Nmap..."
-    if sudo apt-get install -y nmap 2>&1 | grep -qi error; then
-        echo "  ⚠️  Error installing Nmap"
-    else
+    if sudo apt-get install -y nmap; then
         echo "  ✅ Nmap installed"
+    else
+        echo "  ⚠️  Error installing Nmap"
     fi
 else
     echo "  ✅ Nmap already installed"
@@ -62,10 +62,10 @@ fi
 # Install Nikto
 if ! command -v nikto &> /dev/null; then
     echo "  Installing Nikto..."
-    if sudo apt-get install -y nikto 2>&1 | grep -qi error; then
-        echo "  ⚠️  Error installing Nikto"
-    else
+    if sudo apt-get install -y nikto; then
         echo "  ✅ Nikto installed"
+    else
+        echo "  ⚠️  Error installing Nikto"
     fi
 else
     echo "  ✅ Nikto already installed"
