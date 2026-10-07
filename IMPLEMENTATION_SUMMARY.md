@@ -59,7 +59,7 @@
 - ✅ Specific exception handling
 - ✅ CodeQL security scan passed (0 alerts)
 
-### Real vs Placeholder Modules
+### Real Scan Modules
 
 #### Real Implementations (Fully Functional):
 1. **Nmap Port Scanning** ✅
@@ -80,21 +80,18 @@
    - Framework identification
    - Timeout: 10 seconds
 
-#### Placeholder Implementations (Require Setup):
-1. **SQL Injection Testing** ⚠️
-   - Labeled as [INFORMATIONAL]
-   - Risk level: Low (not Critical)
-   - Recommendation for SQLMap integration
+4. **SQL Injection Testing** ✅
+   - SQLMap-powered active probing
+   - Batch mode execution with safe timeouts
+   - Finding extraction for injectable targets
 
-2. **XSS Detection** ⚠️
-   - Labeled as [INFORMATIONAL]
-   - Risk level: Low (not High)
-   - Recommendation for XSStrike integration
+5. **XSS Detection** ✅
+   - Reflected payload probing across common parameters
+   - Response/header analysis for browser-side protections
 
-3. **Directory Fuzzing** ⚠️
-   - Labeled as [INFORMATIONAL]
-   - Risk level: Low
-   - Recommendation for Gobuster/ffuf integration
+6. **Directory Fuzzing** ✅
+   - Request-based endpoint discovery for common sensitive paths
+   - Risk scoring for exposed files and admin resources
 
 ### Testing Results
 
@@ -133,12 +130,12 @@
 ### Key Achievements
 
 ✅ **No External Dependencies** - Runs completely locally
-✅ **Real Tool Integration** - Nmap and Nikto actually execute
+✅ **Real Tool Integration** - Nmap, Nikto, and SQLMap execute with live probing
 ✅ **Production Security** - Whitelist validation, no debug mode
 ✅ **Complete Documentation** - README, API docs, quick start
 ✅ **Automated Setup** - One-command installation
 ✅ **Zero Security Alerts** - CodeQL scan passed
-✅ **Honest Reporting** - Placeholders clearly labeled
+✅ **Expanded Coverage** - SQLi, XSS, and directory checks are operational
 ✅ **Ethical Warnings** - Multiple security notices
 
 ### What Users Get
@@ -150,10 +147,10 @@
 - Report generation
 - Historical scan tracking
 
-**With Additional Setup:**
-- SQL injection testing (requires SQLMap)
-- XSS detection (requires XSStrike)
-- Directory fuzzing (requires Gobuster/ffuf)
+**Additional Coverage:**
+- SQL injection testing (SQLMap-powered, requires SQLMap installed)
+- XSS reflection and security-header checks
+- Directory fuzzing against common sensitive endpoints
 
 ### Installation Time
 
@@ -174,9 +171,9 @@ chmod +x install.sh
 ### Future Enhancements
 
 Priority 1 (Next Release):
-- [ ] SQLMap integration
-- [ ] XSStrike integration
-- [ ] Gobuster/ffuf integration
+- [ ] Deeper crawling and endpoint discovery tuning
+- [ ] Richer XSS payload strategy and context classification
+- [ ] Custom wordlists for directory fuzzing
 
 Priority 2 (Future):
 - [ ] WebSocket for live logs

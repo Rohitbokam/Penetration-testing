@@ -71,6 +71,18 @@ else
     echo "  ✅ Nikto already installed"
 fi
 
+# Install SQLMap
+if ! command -v sqlmap &> /dev/null; then
+    echo "  Installing SQLMap..."
+    if sudo apt-get install -y sqlmap; then
+        echo "  ✅ SQLMap installed"
+    else
+        echo "  ⚠️  Error installing SQLMap"
+    fi
+else
+    echo "  ✅ SQLMap already installed"
+fi
+
 # Install Python and pip
 echo "🐍 Setting up Python environment..."
 if ! command -v python3 &> /dev/null; then

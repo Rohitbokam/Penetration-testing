@@ -14,6 +14,8 @@ import threading
 import os
 from datetime import datetime
 import re
+import shutil
+from urllib.parse import urlparse, urljoin
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
@@ -43,6 +45,14 @@ def sanitize_target(target):
         return target
     else:
         raise ValueError("Invalid target format: must be a valid URL, domain, or IP address")
+
+def normalize_target(target):
+    """Return normalized URL and host from a validated target"""
+    sanitized_target = sanitize_target(target)
+    normalized_url = sanitized_target if sanitized_target.startswith(('http://', 'https://')) else f'http://{sanitized_target}'
+    parsed = urlparse(normalized_url)
+    host = parsed.hostname or sanitized_target
+    return normalized_url, host
 
 def run_nmap_scan(target, scan_id):
     """Execute Nmap port scan"""
@@ -111,71 +121,130 @@ def run_nikto_scan(target, scan_id):
 def run_sql_injection_test(target, scan_id):
     """Execute basic SQL injection tests"""
     try:
-        target = sanitize_target(target)
+        target_url, _ = normalize_target(target)
         scan_status[scan_id]['current_module'] = 'SQL Injection Testing'
         scan_status[scan_id]['progress'] = 60
         
         vulnerabilities = []
-        # NOTE: This is a placeholder for demonstration purposes
-        # Real SQL injection testing requires endpoint discovery and payload injection
-        # Consider integrating SQLMap or implementing custom HTTP-based testing
-        
-        vulnerabilities.append({
-            'name': '[INFORMATIONAL] SQL Injection Testing Placeholder',
-            'risk': 'Low',
-            'recommendation': 'This module requires manual configuration with specific endpoints. For production use, integrate SQLMap or implement custom HTTP request testing with actual SQL injection payloads.'
-        })
-        
-        return vulnerabilities, "SQL injection testing completed (placeholder - manual testing recommended)"
+        if not shutil.which('sqlmap'):
+            return [], "SQLMap not installed (install with: sudo apt-get install -y sqlmap)"
+
+        cmd = [
+            'sqlmap',
+            '-u', target_url,
+            '--batch',
+            '--crawl=1',
+            '--level=1',
+            '--risk=1',
+            '--smart',
+            '--random-agent',
+            '--timeout=15',
+            '--retries=1'
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=240)
+        output = f"{result.stdout}\n{result.stderr}"
+        output_lower = output.lower()
+
+        if any(keyword in output_lower for keyword in ['is vulnerable', 'sql injection vulnerability', 'injectable']):
+            vulnerabilities.append({
+                'name': 'Potential SQL Injection Vulnerability Detected',
+                'risk': 'High',
+                'recommendation': 'Review injectable parameters, apply parameterized queries, and add strict server-side input validation.'
+            })
+
+        return vulnerabilities, output if output.strip() else "SQLMap completed with no output"
     except Exception as e:
         return [], f"Error: {str(e)}"
 
 def run_xss_detection(target, scan_id):
     """Execute XSS detection"""
     try:
-        target = sanitize_target(target)
+        target_url, _ = normalize_target(target)
         scan_status[scan_id]['current_module'] = 'XSS Detection'
         scan_status[scan_id]['progress'] = 70
         
+        import requests
+
         vulnerabilities = []
-        # NOTE: This is a placeholder for demonstration purposes
-        # Real XSS detection requires form discovery and payload injection
-        
-        vulnerabilities.append({
-            'name': '[INFORMATIONAL] XSS Detection Placeholder',
-            'risk': 'Low',
-            'recommendation': 'This module requires manual configuration with specific forms/endpoints. For production use, integrate XSStrike or implement custom form-based testing.'
-        })
-        
-        return vulnerabilities, "XSS detection completed (placeholder - manual testing recommended)"
+        logs = []
+
+        reflection_payload = "threatlens_xss_probe_12345"
+        for param in ['q', 'search', 'query', 'id', 'page']:
+            try:
+                response = requests.get(target_url, params={param: reflection_payload}, timeout=10)
+                logs.append(f"Checked reflected payload in param '{param}' (status {response.status_code})")
+                if reflection_payload in response.text:
+                    vulnerabilities.append({
+                        'name': f'Potential Reflected XSS via parameter: {param}',
+                        'risk': 'High',
+                        'recommendation': 'Encode untrusted output, validate input, and deploy context-aware escaping in templates.'
+                    })
+                    break
+            except requests.RequestException as req_error:
+                logs.append(f"XSS check failed for param '{param}': {str(req_error)}")
+
+        try:
+            baseline_response = requests.get(target_url, timeout=10)
+            csp = baseline_response.headers.get('Content-Security-Policy')
+            xcto = baseline_response.headers.get('X-Content-Type-Options')
+            if not csp:
+                vulnerabilities.append({
+                    'name': 'Missing Content-Security-Policy Header',
+                    'risk': 'Medium',
+                    'recommendation': 'Configure a restrictive Content-Security-Policy to reduce XSS exploitation impact.'
+                })
+            if not xcto:
+                vulnerabilities.append({
+                    'name': 'Missing X-Content-Type-Options Header',
+                    'risk': 'Low',
+                    'recommendation': 'Set X-Content-Type-Options: nosniff to mitigate MIME-type confusion issues.'
+                })
+        except requests.RequestException as req_error:
+            logs.append(f"Baseline header analysis failed: {str(req_error)}")
+
+        return vulnerabilities, '\n'.join(logs) if logs else "XSS detection completed"
     except Exception as e:
         return [], f"Error: {str(e)}"
 
 def run_directory_fuzzing(target, scan_id):
     """Execute directory fuzzing"""
     try:
-        target = sanitize_target(target)
+        target_url, _ = normalize_target(target)
         scan_status[scan_id]['current_module'] = 'Directory Fuzzing'
         scan_status[scan_id]['progress'] = 80
         
+        import requests
+
         vulnerabilities = []
-        # NOTE: This is a placeholder for demonstration purposes
-        # Real directory fuzzing requires HTTP requests with wordlists
-        
-        vulnerabilities.append({
-            'name': '[INFORMATIONAL] Directory Fuzzing Placeholder',
-            'risk': 'Low',
-            'recommendation': 'This module requires integration with tools like Gobuster or ffuf for actual directory enumeration. Manual testing recommended.'
-        })
-        
-        return vulnerabilities, "Directory fuzzing completed (placeholder - manual testing recommended)"
+        logs = []
+        common_paths = [
+            'admin', 'login', 'dashboard', 'api', 'backup', 'backup.zip',
+            '.env', '.git/config', 'robots.txt', 'sitemap.xml', 'config.php'
+        ]
+
+        for path in common_paths:
+            url = urljoin(target_url.rstrip('/') + '/', path)
+            try:
+                response = requests.get(url, timeout=6, allow_redirects=False)
+                if response.status_code in [200, 301, 302, 401, 403]:
+                    risk = 'Medium' if path in ['.env', '.git/config', 'backup', 'backup.zip', 'config.php'] else 'Low'
+                    vulnerabilities.append({
+                        'name': f'Exposed Resource Found: /{path} (HTTP {response.status_code})',
+                        'risk': risk,
+                        'recommendation': 'Restrict access to sensitive resources and disable public exposure of administrative or backup endpoints.'
+                    })
+                logs.append(f"/{path} -> HTTP {response.status_code}")
+            except requests.RequestException as req_error:
+                logs.append(f"/{path} -> request failed: {str(req_error)}")
+
+        return vulnerabilities, '\n'.join(logs) if logs else "Directory fuzzing completed"
     except Exception as e:
         return [], f"Error: {str(e)}"
 
 def run_tech_stack_analysis(target, scan_id):
     """Analyze technology stack"""
     try:
-        target = sanitize_target(target)
+        target_url, _ = normalize_target(target)
         scan_status[scan_id]['current_module'] = 'Tech Stack Analysis'
         scan_status[scan_id]['progress'] = 90
         
@@ -183,7 +252,7 @@ def run_tech_stack_analysis(target, scan_id):
         # Basic header analysis
         import requests
         try:
-            response = requests.get(f"http://{target}" if not target.startswith('http') else target, timeout=10)
+            response = requests.get(target_url, timeout=10)
             headers = response.headers
             
             tech_found = []
@@ -362,6 +431,7 @@ def health_check():
         'tools_available': {
             'nmap': subprocess.run(['which', 'nmap'], capture_output=True).returncode == 0,
             'nikto': subprocess.run(['which', 'nikto'], capture_output=True).returncode == 0,
+            'sqlmap': subprocess.run(['which', 'sqlmap'], capture_output=True).returncode == 0,
             'python': True
         }
     })

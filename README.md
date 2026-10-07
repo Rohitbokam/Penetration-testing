@@ -44,6 +44,7 @@ A fully functional web-based penetration testing platform with real-time integra
 ### Required Tools
 - Nmap
 - Nikto
+- SQLMap
 - Python 3
 - pip (Python package manager)
 
@@ -74,6 +75,9 @@ sudo apt-get install -y nmap
 
 # Install Nikto
 sudo apt-get install -y nikto
+
+# Install SQLMap
+sudo apt-get install -y sqlmap
 
 # Install Python and pip
 sudo apt-get install -y python3 python3-pip python3-venv
