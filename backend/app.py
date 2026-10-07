@@ -375,10 +375,10 @@ def start_scan():
             'message': 'Scan initiated successfully'
         })
         
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        return jsonify({'error': f'Failed to start scan: {str(e)}'}), 500
+    except ValueError:
+        return jsonify({'error': 'Invalid scan request'}), 400
+    except Exception:
+        return jsonify({'error': 'Failed to start scan'}), 500
 
 @app.route('/api/scan/status/<scan_id>', methods=['GET'])
 def get_scan_status(scan_id):
